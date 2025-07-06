@@ -14,7 +14,7 @@ Automatically post release notes to a Discord channel.
       * [Post a release note on behalf of Author](#post-a-release-note-on-behalf-of-author)
     * [Custom Profile](#custom-profile)
   * [Example](#example)
-    * [Post the release note to a Discord channel when a release (including pre-release) is published](#post-the-release-note-to-a-discord-channel-when-a-release-including-pre-release-is-published)
+    * [Post the release note to a Discord channel when a release is published](#post-the-release-note-to-a-discord-channel-when-a-release-is-published)
   * [Documentation](#documentation)
     * [Inputs](#inputs)
     * [Outputs](#outputs)
@@ -120,6 +120,9 @@ See [action.yml](action.yml) for the full documentation.
 
 1. Setting `post_as` to `action` or `author` will override the values of `webhook_name` and `webhook_avatar`.
 2. The action will not be run unless the workflow using the action is triggered by a `release` event.
+3. If a workflow uses `GITHUB_TOKEN` or `github.token` to perform a release event, the workflow using the action cannot
+   be triggered. For more information,
+   see [Triggering a workflow from a workflow](https://docs.github.com/en/actions/how-tos/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow#triggering-a-workflow-from-a-workflow).
 
 ## License
 

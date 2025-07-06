@@ -1,0 +1,17 @@
+name: Release
+
+on:
+  release:
+    types: [ released ]
+
+jobs:
+  notify:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cynthiachanky/discord-notification-action@v1
+        with:
+          webhook_url: ${{ secrets.CHANGELOG_CHANNEL }}
+          post_as: "action"
