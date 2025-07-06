@@ -1,9 +1,12 @@
 # Discord Notification Action
 
-![version](https://img.shields.io/badge/version-1.0.0-brightgreen)
-![unit test (release)](https://github.com/cynthiachanky/discord-notification-action/actions/workflows/unit-test-release.yml/badge.svg)
+[![Release](https://img.shields.io/github/v/release/cynthiachanky/discord-notification-action?style=for-the-badge)](https://github.com/cynthiachanky/discord-notification-action/releases)
+[![Unit Test (Release)](https://img.shields.io/github/actions/workflow/status/cynthiachanky/discord-notification-action/unit-test-release.yml?style=for-the-badge&label=Unit%20Test%20(Release))](https://github.com/cynthiachanky/discord-notification-action/actions?workflow=Unit%20Test%20(Release))
+[![GitHub License](https://img.shields.io/github/license/cynthiachanky/discord-notification-action?style=for-the-badge)](LICENSE)
 
 Automatically post release notes to a Discord channel.
+
+<img src="assets/profile/default.png" alt="Default Profile" width="640" height="100%">
 
 **Table of Contents**
 <!-- TOC -->
@@ -51,6 +54,8 @@ The action provides **GitHub Actions** and **Author** as predefined profiles. Yo
           post_as: "action"
 ```
 
+<img src="assets/profile/action.png" alt="Action Profile" width="640" height="100%">
+
 #### Post a release note on behalf of Author
 
 ```yaml
@@ -59,6 +64,8 @@ The action provides **GitHub Actions** and **Author** as predefined profiles. Yo
           webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
           post_as: "author"
 ```
+
+<img src="assets/profile/author.png" alt="Author Profile" width="640" height="100%">
 
 ### Custom Profile
 
@@ -69,9 +76,11 @@ Alternatively, you can customize the name and/or avatar of the Webhook by provid
       - uses: cynthiachanky/discord-notification-action@v1
         with:
           webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          webhook_name: "Custom Bot"
-          webhook_avatar: "https://avatar.example.com/custom-bot.png"
+          webhook_name: "GitHub Webhook"
+          webhook_avatar: "https://raw.githubusercontent.com/cynthiachanky/discord-notification-action/main/assets/webhook.png"
 ```
+
+<img src="assets/profile/custom.png" alt="Custom Profile" width="640" height="100%">
 
 ## Example
 
