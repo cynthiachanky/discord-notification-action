@@ -1,0 +1,10 @@
+# IDE files
+.idea
+.vscode
+*.code-workspace
+
+# OS metadata
+.DS_Store
+
+# dotenv environment variable files
+.env

@@ -1,0 +1,133 @@
+name: Unit Test (Release)
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  test-default:
+    permissions:
+      contents: read
+    if: ${{ github.ref == 'refs/tags/action-test' }}
+    strategy:
+      matrix:
+        runs-on: [ ubuntu-latest, macos-latest, windows-latest ]
+    runs-on: ${{ matrix.runs-on }}
+    outputs:
+      release_id: ${{ steps.notification.outputs.release_id }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Post the release note with default input
+        id: notification
+        uses: ./
+        with:
+          webhook_url: ${{ secrets.ACTION_TEST_WEBHOOK }}
+
+  test-action:
+    permissions:
+      contents: read
+    if: ${{ github.ref == 'refs/tags/action-test' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Post the release note on behalf of GitHub Actions
+        id: notification
+        uses: ./
+        with:
+          webhook_url: ${{ secrets.ACTION_TEST_WEBHOOK }}
+          post_as: "action"
+
+  test-author:
+    permissions:
+      contents: read
+    if: ${{ github.ref == 'refs/tags/action-test' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Post the release note on behalf of Author
+        id: notification
+        uses: ./
+        with:
+          webhook_url: ${{ secrets.ACTION_TEST_WEBHOOK }}
+          post_as: "author"
+
+  test-override:
+    permissions:
+      contents: read
+    if: ${{ github.ref == 'refs/tags/action-test' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Create an overriding profile
+        id: profile
+        run: |
+          RESPONSE=$(
+            curl -s -L --oauth2-bearer ${{ github.token }} \
+            -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/contents/assets/webhook.png"
+          )
+          PROFILE_NAME="GitHub Webhook"
+          PROFILE_AVATAR=$(echo -E ${RESPONSE} | jq -r ".download_url")
+          if [[ -z ${PROFILE_AVATAR} || ${PROFILE_AVATAR} == https://raw.githubusercontent.com/* ]]
+          then
+            echo "webhook_name=${PROFILE_NAME}" >> "${GITHUB_OUTPUT}"
+            echo "webhook_avatar=${PROFILE_AVATAR}" >> "${GITHUB_OUTPUT}"
+            exit 0
+          else
+            echo "${RESPONSE}"
+            exit 1
+          fi
+      - name: Post the release note with overriding name
+        id: notification-name
+        uses: ./
+        with:
+          webhook_url: ${{ secrets.ACTION_TEST_WEBHOOK }}
+          webhook_name: ${{ steps.profile.outputs.webhook_name }}
+      - name: Post the release note with overriding avatar
+        id: notification-avatar
+        uses: ./
+        with:
+          webhook_url: ${{ secrets.ACTION_TEST_WEBHOOK }}
+          webhook_avatar: ${{ steps.profile.outputs.webhook_avatar }}
+      - name: Post the release note with overriding name and avatar
+        id: notification-profile
+        uses: ./
+        with:
+          webhook_url: ${{ secrets.ACTION_TEST_WEBHOOK }}
+          webhook_name: ${{ steps.profile.outputs.webhook_name }}
+          webhook_avatar: ${{ steps.profile.outputs.webhook_avatar }}
+
+  cleanup:
+    permissions:
+      contents: write
+    needs: [ test-default, test-action, test-author, test-override ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete the release
+        run: |
+          STATUS_CODE=$(
+            curl -s -L -X DELETE --oauth2-bearer ${{ github.token }} \
+            -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
+            -w "%{response_code}\n" -o /dev/null \
+            "https://api.github.com/repos/${{ github.repository }}/releases/${{ needs.test-default.outputs.release_id }}"
+          )
+          echo "Status: ${STATUS_CODE}"
+          if [ ${STATUS_CODE} -eq 204 ]; then exit 0; else exit 1; fi
+      - name: Delete the tag
+        run: |
+          STATUS_CODE=$(
+            curl -s -L -X DELETE --oauth2-bearer ${{ github.token }} \
+            -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
+            -w "%{response_code}\n" -o /dev/null \
+            "https://api.github.com/repos/${{ github.repository }}/git/refs/tags/action-test"
+          )
+          echo "Status: ${STATUS_CODE}"
+          if [ ${STATUS_CODE} -eq 204 ]; then exit 0; else exit 1; fi

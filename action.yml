@@ -1,0 +1,73 @@
+name: "Discord Notification Action"
+description: "Automatically post releases to a Discord channel"
+author: "Cynthia"
+
+inputs:
+  webhook_url:
+    description: "The URL used for executing the Webhook"
+    required: true
+  webhook_name:
+    description: "The name of the Webhook"
+    required: false
+  webhook_avatar:
+    description: "The avatar of the Webhook"
+    required: false
+  post_as:
+    description: "The profile of the Webhook [default | action | author]"
+    required: false
+    default: "default"
+
+outputs:
+  release_id:
+    description: "The unique identifier of the release"
+    value: ${{ steps.release.outputs.release_id }}
+  release_name:
+    description: "The name of the release"
+    value: ${{ steps.release.outputs.release_name }}
+
+runs:
+  using: "composite"
+  steps:
+    - if: ${{ inputs.post_as == 'default' }}
+      id: profile-default
+      shell: bash
+      run: |
+        echo "profile_name=${{ inputs.webhook_name }}" >> "${GITHUB_OUTPUT}"
+        echo "profile_avatar=${{ inputs.webhook_avatar }}" >> "${GITHUB_OUTPUT}"
+    - if: ${{ inputs.post_as == 'action' }}
+      id: profile-action
+      shell: bash
+      run: |
+        echo "profile_name=GitHub Actions" >> "${GITHUB_OUTPUT}"
+        echo "profile_avatar=https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png" >> "${GITHUB_OUTPUT}"
+    - if: ${{ inputs.post_as == 'author' }}
+      id: profile-author
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const {sender} = context.payload;
+          core.setOutput('profile_name', sender.login);
+          core.setOutput('profile_avatar', sender.avatar_url);
+    - id: profile
+      shell: bash
+      run: |
+        echo "webhook_name=${{ env.WEBHOOK_NAME }}" >> "${GITHUB_OUTPUT}"
+        echo "webhook_avatar=${{ env.WEBHOOK_AVATAR }}" >> "${GITHUB_OUTPUT}"
+      env:
+        WEBHOOK_NAME: ${{ steps.profile-author.outputs.profile_name || steps.profile-action.outputs.profile_name || steps.profile-default.outputs.profile_name }}
+        WEBHOOK_AVATAR: ${{ steps.profile-author.outputs.profile_avatar || steps.profile-action.outputs.profile_avatar || steps.profile-default.outputs.profile_avatar }}
+    - if: ${{ github.event_name == 'release' }}
+      id: release
+      shell: bash
+      run: $GITHUB_ACTION_PATH/entrypoint/release.sh
+      env:
+        DISCORD_WEBHOOK_URL: ${{ inputs.webhook_url }}
+        DISCORD_WEBHOOK_NAME: ${{ steps.profile.outputs.webhook_name }}
+        DISCORD_WEBHOOK_AVATAR: ${{ steps.profile.outputs.webhook_avatar }}
+        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_REPO: ${{ github.repository }}
+        GITHUB_TAG: ${{ github.ref_name }}
+
+branding:
+  icon: "message-circle"
+  color: "gray-dark"
