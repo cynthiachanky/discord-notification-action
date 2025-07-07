@@ -1,0 +1,39 @@
+name: 💬 Question
+description: Ask the community for help
+title: "[Question] "
+labels: [ "type: question" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!TIP]
+        > Kindly search for similar issues before creating a new one to help us keep the tracker organized.
+  - type: textarea
+    attributes:
+      label: Summary
+      description: What do you need help with?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Workflow Snippet
+      description: How do you use the action?
+      placeholder: |
+        Example:
+        ```yaml
+        name: Release
+        on:
+          release:
+            types: [ released ]
+        jobs:
+          notify:
+            permissions:
+              contents: read
+            runs-on: ubuntu-latest
+            steps:
+              - uses: cynthiachanky/discord-notification-action@v1
+                with:
+                  webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        ```
+    validations:
+      required: false

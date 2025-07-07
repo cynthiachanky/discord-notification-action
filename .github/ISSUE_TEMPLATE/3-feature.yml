@@ -1,0 +1,28 @@
+name: 🚀 Feature Request
+description: Propose a new feature for the action
+title: "[Feature] "
+labels: [ "type: feature" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!TIP]
+        > Kindly search for similar issues before creating a new one to help us keep the tracker organized.
+  - type: textarea
+    attributes:
+      label: Use Case
+      description: Explain how the feature would benefit your workflow or projects.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Proposed Solution
+      description: Describe how the feature could be implemented.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Share any other details, references, or examples here.
+    validations:
+      required: false

@@ -1,0 +1,22 @@
+name: 📚 Documentation
+description: Provide feedback on the current documentation
+title: "[Documentation] "
+labels: [ "type: documentation" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!TIP]
+        > Kindly search for similar issues before creating a new one to help us keep the tracker organized.
+  - type: textarea
+    attributes:
+      label: Problem
+      description: Which part is unclear or outdated in the current README.md?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Suggestion
+      description: How would you like to amend the README.md?
+    validations:
+      required: true
