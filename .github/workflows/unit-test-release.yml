@@ -111,23 +111,10 @@ jobs:
     needs: [ test-default, test-action, test-author, test-override ]
     runs-on: ubuntu-latest
     steps:
-      - name: Delete the release
-        run: |
-          STATUS_CODE=$(
-            curl -s -L -X DELETE --oauth2-bearer ${{ github.token }} \
-            -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
-            -w "%{response_code}\n" -o /dev/null \
-            "https://api.github.com/repos/${{ github.repository }}/releases/${{ needs.test-default.outputs.release_id }}"
-          )
-          echo "Status: ${STATUS_CODE}"
-          if [ ${STATUS_CODE} -eq 204 ]; then exit 0; else exit 1; fi
-      - name: Delete the tag
-        run: |
-          STATUS_CODE=$(
-            curl -s -L -X DELETE --oauth2-bearer ${{ github.token }} \
-            -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
-            -w "%{response_code}\n" -o /dev/null \
-            "https://api.github.com/repos/${{ github.repository }}/git/refs/tags/action-test"
-          )
-          echo "Status: ${STATUS_CODE}"
-          if [ ${STATUS_CODE} -eq 204 ]; then exit 0; else exit 1; fi
+      - name: Delete the release and its associated tag
+        run: ./entrypoint/utilities/cleanup-release.sh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPO: ${{ github.repository }}
+          RELEASE_ID: ${{ needs.test-default.outputs.release_id }}
+          TAG_REF: ${{ github.ref }}
