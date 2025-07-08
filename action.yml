@@ -24,6 +24,9 @@ outputs:
   release_name:
     description: "The name of the release"
     value: ${{ steps.release.outputs.release_name }}
+  release_url:
+    description: "The URL of the release"
+    value: ${{ steps.release.outputs.release_url }}
 
 runs:
   using: "composite"
@@ -42,12 +45,10 @@ runs:
         echo "profile_avatar=https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png" >> "${GITHUB_OUTPUT}"
     - if: ${{ inputs.post_as == 'author' }}
       id: profile-author
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const {sender} = context.payload;
-          core.setOutput('profile_name', sender.login);
-          core.setOutput('profile_avatar', sender.avatar_url);
+      shell: bash
+      run: |
+        echo "profile_name=${{ github.event.sender.login }}" >> "${GITHUB_OUTPUT}"
+        echo "profile_avatar=${{ github.event.sender.avatar_url }}" >> "${GITHUB_OUTPUT}"
     - id: profile
       shell: bash
       run: |
@@ -59,7 +60,8 @@ runs:
     - if: ${{ github.event_name == 'release' }}
       id: release
       shell: bash
-      run: $GITHUB_ACTION_PATH/entrypoint/release.sh
+      working-directory: ${{ github.action_path }}
+      run: ./entrypoint/release.sh
       env:
         DISCORD_WEBHOOK_URL: ${{ inputs.webhook_url }}
         DISCORD_WEBHOOK_NAME: ${{ steps.profile.outputs.webhook_name }}
