@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "> Deleting the release..."
+echo "> Deleting release ${RELEASE_ID}..."
 STATUS_CODE=$(
   curl -s -L -X DELETE --oauth2-bearer ${GITHUB_TOKEN} \
   -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
@@ -10,7 +10,7 @@ STATUS_CODE=$(
 echo "Status: ${STATUS_CODE}"
 if [ ${STATUS_CODE} -ne 204 ]; then exit 1; fi
 
-echo "> Deleting the tag..."
+echo "> Deleting tag ${TAG_REF}..."
 STATUS_CODE=$(
   curl -s -L -X DELETE --oauth2-bearer ${GITHUB_TOKEN} \
   -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
