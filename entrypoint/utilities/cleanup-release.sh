@@ -8,7 +8,7 @@ STATUS_CODE=$(
   "https://api.github.com/repos/${GITHUB_REPO}/releases/${RELEASE_ID}"
 )
 echo "Status: ${STATUS_CODE}"
-if [ ${STATUS_CODE} -eq 204 ]; then exit 0; else exit 1; fi
+if [ ${STATUS_CODE} -ne 204 ]; then exit 1; fi
 
 echo "> Deleting the tag..."
 STATUS_CODE=$(
@@ -18,4 +18,6 @@ STATUS_CODE=$(
   "https://api.github.com/repos/${GITHUB_REPO}/git/${TAG_REF}"
 )
 echo "Status: ${STATUS_CODE}"
-if [ ${STATUS_CODE} -eq 204 ]; then exit 0; else exit 1; fi
+if [ ${STATUS_CODE} -ne 204 ]; then exit 1; fi
+
+exit 0
