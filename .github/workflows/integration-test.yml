@@ -2,14 +2,7 @@ name: Integration Test
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - "main"
-      - "preview"
-      - "releases/**"
-    paths:
-      - "action.yml"
-      - "entrypoint/**/*.sh"
+  workflow_call:
 
 jobs:
   trigger-release:
@@ -26,7 +19,7 @@ jobs:
         run: |
           if [[ ${{ github.event_name }} == pull_request ]]
           then
-            TAG_NAME="action-test/${{ github.ref_name }}"
+            TAG_NAME="action-test/pr/${{ github.event.pull_request.number }}"
           else
             TAG_NAME="action-test/manual/${{ github.ref_name }}"
           fi
