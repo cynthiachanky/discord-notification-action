@@ -2,17 +2,30 @@ name: Integration Test
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 jobs:
-  trigger:
+  trigger-release:
     permissions:
       contents: write
-    if: ${{ github.triggering_actor == github.repository_owner }}
+    if: ${{ github.event_name == 'pull_request' || github.triggering_actor == github.repository_owner }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
+        id: checkout
         uses: actions/checkout@v4
+      - name: Generate the tag name
+        id: tag
+        run: |
+          if [[ ${{ github.event_name }} == pull_request ]]
+          then
+            TAG_NAME="action-test/pr/${{ github.event.pull_request.number }}"
+          else
+            TAG_NAME="action-test/manual/${{ github.ref_name }}"
+          fi
+          echo "tag_name=${TAG_NAME}" >> "${GITHUB_OUTPUT}"
       - name: Cleanup
+        id: cleanup
         run: |
           ./entrypoint/utilities/extract-release.sh
           source release_meta
@@ -26,14 +39,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_REPO: ${{ github.repository }}
-          GITHUB_TAG: "action-test"
-          TAG_REF: "refs/tags/action-test"
+          GITHUB_TAG: ${{ steps.tag.outputs.tag_name }}
+          TAG_REF: "refs/tags/${{ steps.tag.outputs.tag_name }}"
       - name: Create a release
+        id: release
         run: |
           RESPONSE=$(
             curl -s -L -X POST --oauth2-bearer ${{ secrets.ACTION_TEST_TOKEN }} \
             -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
-            --json '{"tag_name": "action-test", "target_commitish": "${{ github.sha }}", "name": "GitHub Action Test", "body": "## PLEASE IGNORE THIS RELEASE\nThis is a release to **test the GitHub Action**, which will be deleted once the test workflow completes successfully.", "prerelease": true}' \
+            --json '{"tag_name": "${{ steps.tag.outputs.tag_name }}", "target_commitish": "${{ github.sha }}", "name": "GitHub Action Test (${{ github.ref_name }})", "body": "## PLEASE IGNORE THIS RELEASE\nThis is a release to **test the GitHub Action**, which will be deleted once the test workflow completes successfully.", "prerelease": true}' \
             "https://api.github.com/repos/${{ github.repository }}/releases"
           )
           RELEASE_ID=$(echo -E ${RESPONSE} | jq -r ".id")
