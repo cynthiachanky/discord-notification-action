@@ -124,6 +124,7 @@ See [action.yml](action.yml) for the full documentation.
 |----------------|--------------------------------------|
 | `release_id`   | The unique identifier of the release |
 | `release_name` | The name of the release              |
+| `release_url`  | The URL of the release               |
 
 ### Notes
 
