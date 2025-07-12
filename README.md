@@ -6,7 +6,7 @@
 
 Automatically post release notes to a Discord channel.
 
-<img src="assets/profile/default.png" alt="Default Profile" width="640" height="100%">
+![Default Profile](assets/profile/default.png)
 
 **Table of Contents**
 <!-- TOC -->
@@ -54,7 +54,7 @@ The action provides **GitHub Actions** and **Author** as predefined profiles. Yo
           post_as: "action"
 ```
 
-<img src="assets/profile/action.png" alt="Action Profile" width="640" height="100%">
+![Action Profile](assets/profile/action.png)
 
 #### Post a release note on behalf of Author
 
@@ -65,7 +65,7 @@ The action provides **GitHub Actions** and **Author** as predefined profiles. Yo
           post_as: "author"
 ```
 
-<img src="assets/profile/author.png" alt="Author Profile" width="640" height="100%">
+![Author Profile](assets/profile/author.png)
 
 ### Custom Profile
 
@@ -80,7 +80,7 @@ Alternatively, you can customize the name and/or avatar of the Webhook by provid
           webhook_avatar: "https://raw.githubusercontent.com/cynthiachanky/discord-notification-action/main/assets/webhook.png"
 ```
 
-<img src="assets/profile/custom.png" alt="Custom Profile" width="640" height="100%">
+![Custom Profile](assets/profile/custom.png)
 
 ## Example
 
