@@ -10,29 +10,29 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-      - name: Get the bot profile
-        id: profile
-        uses: octokit/request-action@v2.x
+      - name: Create the bot token
+        id: bot
+        uses: actions/create-github-app-token@v2
         with:
-          route: GET /users/{username}
-          username: "github-actions[bot]"
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-      - name: Upsert the major version tag reference
-        id: tag
+          app-id: ${{ vars.ACTION_APP_ID }}
+          private-key: ${{ secrets.ACTION_PRIVATE_KEY }}
+      - name: Retrieve the major version
+        id: version
         run: |
           MAJOR_VERSION=$(echo ${{ github.ref_name }} | cut -d "." -f 1)
-          echo "MAJOR_VERSION: ${MAJOR_VERSION}"
-          git config user.name "${{ env.USER_NAME }}"
-          git config user.email "${{ env.USER_ID }}+${{ env.USER_NAME }}@users.noreply.github.com"
-          git tag -f "${MAJOR_VERSION}" ${{ github.sha }}
-          git push -f origin "${MAJOR_VERSION}"
+          echo "Using ${MAJOR_VERSION} as the major version"
+          echo "major_version=${MAJOR_VERSION}" >> "${GITHUB_OUTPUT}"
+      - name: Upsert the major version tag reference
+        id: tag
+        uses: octokit/request-action@v2.x
+        with:
+          route: PATCH /repos/{repository}/git/{reference}
+          repository: ${{ github.repository }}
+          reference: "refs/tags/${{ steps.version.outputs.major_version }}"
+          sha: ${{ github.sha }}
+          force: true
         env:
-          USER_ID: ${{ fromJson(steps.profile.outputs.data).id }}
-          USER_NAME: ${{ fromJson(steps.profile.outputs.data).login }}
+          GITHUB_TOKEN: ${{ steps.bot.outputs.token }}
 
   notify:
     permissions:

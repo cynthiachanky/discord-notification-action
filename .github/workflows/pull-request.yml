@@ -13,14 +13,19 @@ on:
 
 jobs:
   label-no-merge:
-    permissions:
-      pull-requests: write
     runs-on: ubuntu-latest
     steps:
+      - name: Create the bot token
+        id: bot
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ACTION_APP_ID }}
+          private-key: ${{ secrets.ACTION_PRIVATE_KEY }}
       - name: Add 'no merge' label to the updated pull request
+        id: label
         run: |
           STATUS_CODE=$(
-            curl -s -L -X POST --oauth2-bearer ${{ secrets.ACTION_TEST_TOKEN }} \
+            curl -s -L -X POST --oauth2-bearer ${{ env.TOKEN }} \
             -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
             -w "%{response_code}\n" -o /dev/null \
             --json '{"labels": ["no merge"]}' \
@@ -28,6 +33,8 @@ jobs:
           )
           echo "Status: ${STATUS_CODE}"
           if [ ${STATUS_CODE} -ne 200 ]; then exit 1; fi
+        env:
+          TOKEN: ${{ steps.bot.outputs.token }}
 
   run-test:
     permissions:
