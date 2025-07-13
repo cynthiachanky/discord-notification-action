@@ -122,15 +122,22 @@ jobs:
           TAG_REF: ${{ github.ref }}
 
   unlabel-no-merge:
-    permissions:
-      pull-requests: write
     needs: [ cleanup ]
     if: ${{ startsWith(github.event.release.tag_name, 'action-test/pr/') }}
     runs-on: ubuntu-latest
     steps:
+      - name: Create the bot token
+        id: bot
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ACTION_APP_ID }}
+          private-key: ${{ secrets.ACTION_PRIVATE_KEY }}
       - name: Remove 'no merge' label from the passed pull request
+        id: label
         run: |
           PR_NUMBER=$(echo "${{ github.event.release.tag_name }}" | sed -e "s/action-test\/pr\///g")
-          curl -s -L -X DELETE --oauth2-bearer ${{ secrets.ACTION_TEST_TOKEN }} \
+          curl -s -L -X DELETE --oauth2-bearer ${{ env.TOKEN }} \
           -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
           "https://api.github.com/repos/${{ github.repository }}/issues/${PR_NUMBER}/labels/no%20merge"
+        env:
+          TOKEN: ${{ steps.bot.outputs.token }}

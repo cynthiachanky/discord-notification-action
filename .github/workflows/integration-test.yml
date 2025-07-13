@@ -11,6 +11,12 @@ jobs:
     if: ${{ github.event_name == 'pull_request' || github.triggering_actor == github.repository_owner }}
     runs-on: ubuntu-latest
     steps:
+      - name: Create the bot token
+        id: bot
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.ACTION_APP_ID }}
+          private-key: ${{ secrets.ACTION_PRIVATE_KEY }}
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
@@ -45,7 +51,7 @@ jobs:
         id: release
         run: |
           RESPONSE=$(
-            curl -s -L -X POST --oauth2-bearer ${{ secrets.ACTION_TEST_TOKEN }} \
+            curl -s -L -X POST --oauth2-bearer ${{ env.TOKEN }} \
             -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" \
             --json '{"tag_name": "${{ steps.tag.outputs.tag_name }}", "target_commitish": "${{ github.sha }}", "name": "GitHub Action Test (${{ github.ref_name }})", "body": "## PLEASE IGNORE THIS RELEASE\nThis is a release to **test the GitHub Action**, which will be deleted once the test workflow completes successfully.", "prerelease": true}' \
             "https://api.github.com/repos/${{ github.repository }}/releases"
@@ -59,3 +65,5 @@ jobs:
             echo "${RESPONSE}"
             exit 1
           fi
+        env:
+          TOKEN: ${{ steps.bot.outputs.token }}
