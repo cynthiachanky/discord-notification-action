@@ -26,9 +26,9 @@ jobs:
         id: tag
         uses: octokit/request-action@v2.x
         with:
-          route: PATCH /repos/{repository}/git/{reference}
+          route: PATCH /repos/{repository}/git/refs/tags/{tag_name}
           repository: ${{ github.repository }}
-          reference: "refs/tags/${{ steps.version.outputs.major_version }}"
+          tag_name: ${{ steps.version.outputs.major_version }}
           sha: ${{ github.sha }}
           force: true
         env:
