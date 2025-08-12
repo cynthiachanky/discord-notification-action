@@ -19,7 +19,7 @@ jobs:
           private-key: ${{ secrets.ACTION_PRIVATE_KEY }}
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Generate the tag name
         id: tag
         run: |
